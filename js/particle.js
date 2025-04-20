@@ -26,29 +26,26 @@ class Particle {
         this.lifespan += deltaTime;
         this.pulsePhase += deltaTime * 2;
         
-        // Apply movement based on word connections
-        if (this.isPartOfWord) {
-            // If this particle has a target position, move toward it
-            if (this.hasTargetPosition) {
-                const dx = this.targetX - this.x;
-                const dy = this.targetY - this.y;
-                const dist = Math.sqrt(dx*dx + dy*dy);
-                
-                if (dist > 1) { // Only move if not already at target
-                    const speed = Math.min(dist * 0.1, 3); // Faster when further away
-                    this.vx = (dx / dist) * speed;
-                    this.vy = (dy / dist) * speed;
-                } else {
-                    this.vx *= 0.8;
-                    this.vy *= 0.8;
-                }
+        // Move letters into position when they form a word
+        if (this.isPartOfWord && this.hasTargetPosition) {
+            const dx = this.targetX - this.x;
+            const dy = this.targetY - this.y;
+            const dist = Math.sqrt(dx*dx + dy*dy);
+            
+            if (dist > 1) {
+                const speed = Math.min(dist * 0.1, 3);
+                this.vx = (dx / dist) * speed;
+                this.vy = (dy / dist) * speed;
+            } else {
+                this.vx *= 0.8;
+                this.vy *= 0.8;
             }
         }
         
-        // Handle bouncing off the edges with damping
+        // Bounce off the screen edges
         if (this.x < this.size/2) {
             this.x = this.size/2;
-            this.vx *= -0.5; // More damping on bounce
+            this.vx *= -0.5;
         } else if (this.x > width - this.size/2) {
             this.x = width - this.size/2;
             this.vx *= -0.5;
@@ -62,29 +59,26 @@ class Particle {
             this.vy *= -0.5;
         }
         
-        // Apply forces from other particles
-        if (!this.hasTargetPosition) { // Skip complex forces if already moving to target
+        // Letters interact with each other
+        if (!this.hasTargetPosition) {
             for (const other of particles) {
                 if (other === this) continue;
                 const dx = this.x - other.x;
                 const dy = this.y - other.y;
                 const dist = Math.sqrt(dx*dx + dy*dy);
                 
-                // Skip if too far
                 if (dist > 150 || dist === 0) continue;
                 
-                // Same sequence particles attract each other gently
+                // Letters in the same word attract each other
                 if (this.sequenceId === other.sequenceId) {
-                    // Calculate index difference - sequential letters should attract more
                     const indexDiff = Math.abs(this.letterIndex - other.letterIndex);
                     
                     if (indexDiff === 1) {
-                        // Sequential letters attract
-                        const force = 0.05; // Reduced attraction force
+                        const force = 0.05;
                         this.vx -= (dx / dist) * force;
                         this.vy -= (dy / dist) * force;
                         
-                        // If they're close enough, mark as connected
+                        // Connect nearby sequential letters
                         if (dist < 100 && !this.connectedParticles.includes(other)) {
                             this.connectedParticles.push(other);
                             if (!other.connectedParticles.includes(this)) {
@@ -94,9 +88,8 @@ class Particle {
                     }
                 }
                 
-                // All particles repel when too close
+                // Don't let letters overlap
                 if (dist < 40) {
-                    // Strong repulsion when too close
                     const force = (40 - dist) * 0.01;
                     this.vx += (dx / dist) * force;
                     this.vy += (dy / dist) * force;
@@ -104,13 +97,13 @@ class Particle {
             }
         }
         
-        // Apply velocity with stronger damping
+        // Move the letter
         this.x += this.vx;
         this.y += this.vy;
-        this.vx *= 0.95; // More damping to stabilize movement
+        this.vx *= 0.95;
         this.vy *= 0.95;
         
-        // If part of a word, animate size
+        // Make words pulse slightly
         if (this.isPartOfWord) {
             const pulse = Math.sin(this.pulsePhase) * 0.1 + 1;
             this.size = this.baseSize * pulse;
@@ -118,7 +111,7 @@ class Particle {
     }
 
     draw(ctx) {
-        // Draw connections to other particles
+        // Draw lines connecting letters in a word
         if (this.connectedParticles.length > 0) {
             ctx.strokeStyle = this.isPartOfWord ? 
                 `hsla(${(this.sequenceId * 40) % 360}, 90%, 60%, 0.6)` : 
@@ -127,8 +120,6 @@ class Particle {
             ctx.beginPath();
             
             for (const other of this.connectedParticles) {
-                // Only draw if this particle's index is less than the other's
-                // to avoid drawing the same connection twice
                 if (this.letterIndex < other.letterIndex) {
                     ctx.moveTo(this.x, this.y);
                     ctx.lineTo(other.x, other.y);
@@ -137,7 +128,7 @@ class Particle {
             ctx.stroke();
         }
         
-        // Draw letter with shadow for depth
+        // Add a glow effect to letters in words
         if (this.isPartOfWord) {
             ctx.shadowColor = `hsla(${(this.sequenceId * 40) % 360}, 90%, 50%, 0.5)`;
             ctx.shadowBlur = 15;
@@ -145,6 +136,7 @@ class Particle {
             ctx.shadowColor = 'transparent';
         }
         
+        // Draw the actual letter
         ctx.font = `bold ${Math.floor(this.size)}px 'Helvetica Neue', Arial, sans-serif`;
         ctx.fillStyle = this.isPartOfWord ? 
             `hsl(${(this.sequenceId * 40) % 360}, 90%, 70%)` : 
@@ -153,11 +145,10 @@ class Particle {
         ctx.textBaseline = 'middle';
         ctx.fillText(this.letter, this.x, this.y);
         
-        // Reset shadow
         ctx.shadowColor = 'transparent';
         ctx.shadowBlur = 0;
         
-        // Draw outline if part of word
+        // Add white outline to letters in words
         if (this.isPartOfWord) {
             ctx.strokeStyle = 'rgba(255,255,255,0.7)';
             ctx.lineWidth = 1;

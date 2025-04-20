@@ -6,31 +6,28 @@ const clearBtn = document.getElementById('clear-btn');
 const toggleBtn = document.getElementById('toggle-instructions');
 const instructionsPanel = document.querySelector('.instructions');
 
-// Handle window resize
+// Make sure everything looks right when the window is resized
 window.addEventListener('resize', () => composer.resize());
 
-// Toggle instructions panel
+// Let users toggle the instructions panel
 toggleBtn.addEventListener('click', () => {
     instructionsPanel.classList.toggle('collapsed');
     toggleBtn.textContent = instructionsPanel.classList.contains('collapsed') ? '+' : '−';
 });
 
-// Handle key presses to spawn letters
+// Handle keyboard input for creating letters
 window.addEventListener('keydown', (e) => {
-    // Ignore modifier keys and other special keys
     if (e.key.length === 1 && /^[a-zA-Z]$/.test(e.key)) {
         composer.addParticle(e.key);
     } else if (e.key === ' ') {
-        // Space adds a space marker
         composer.addParticle('_');
-        e.preventDefault(); // Prevent page scrolling
+        e.preventDefault();
     } else if (e.key === 'Escape') {
-        // Escape clears the canvas
         composer.clear();
     }
 });
 
-// Mouse interaction
+// Mouse interaction to push letters around
 let isDragging = false;
 let lastMouseX = 0;
 let lastMouseY = 0;
@@ -48,14 +45,12 @@ canvas.addEventListener('mousemove', (e) => {
         const mouseX = e.clientX;
         const mouseY = e.clientY;
         
-        // Apply force to nearby particles
         for (const particle of composer.particles) {
             const dx = particle.x - mouseX;
             const dy = particle.y - mouseY;
             const dist = Math.sqrt(dx*dx + dy*dy);
             
             if (dist < radius) {
-                // Push particles away from mouse cursor
                 const pushForce = (radius - dist) / radius * force;
                 particle.vx += (dx / dist) * pushForce;
                 particle.vy += (dy / dist) * pushForce;
@@ -67,26 +62,20 @@ canvas.addEventListener('mousemove', (e) => {
     }
 });
 
-canvas.addEventListener('mouseup', () => {
-    isDragging = false;
-});
+canvas.addEventListener('mouseup', () => isDragging = false);
+canvas.addEventListener('mouseleave', () => isDragging = false);
 
-canvas.addEventListener('mouseleave', () => {
-    isDragging = false;
-});
-
-// Clear particles
+// Clear the canvas when the reset button is clicked
 clearBtn.addEventListener('click', () => {
     composer.clear();
-    clearBtn.blur(); // Return focus to the window
+    clearBtn.blur();
 });
 
-// Animation loop
+// Animation loop that keeps everything moving
 function animate() {
     composer.update();
     composer.draw();
     requestAnimationFrame(animate);
 }
 
-// Start animation
 animate();
