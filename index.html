@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Typographic Composer</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <canvas id="composer-canvas"></canvas>
+    <div class="instructions">
+        <div class="instructions-header">
+            <h1>Typographic Composer</h1>
+            <button id="toggle-instructions" class="toggle-btn">−</button>
+        </div>
+        <div class="instructions-content">
+            <p>Type words and watch them form connections.</p>
+            <p>Letters entered together will try to form words.</p>
+            <ul>
+                <li>Type a word quickly to create connected letters</li>
+                <li>Pause typing for 1.5 seconds to start a new word</li>
+                <li>Drag your mouse to push letters around</li>
+                <li>Press <kbd>ESC</kbd> or click Clear to reset</li>
+            </ul>
+            <button id="clear-btn">Clear</button>
+        </div>
+    </div>
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>
