@@ -54,11 +54,7 @@ Works best in modern browsers that support:
 - Web Audio API
 - ES6 JavaScript features
 
-## License
-
-MIT License - See LICENSE file for details
-
 ## Credits
 
 - Font: Montserrat (Google Fonts)
-- Dictionary: Based on an open-source English word list
+- Dictionary: Based on an open-source English word list (It's literally a language...)
